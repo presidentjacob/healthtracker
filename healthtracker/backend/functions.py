@@ -1,0 +1,1 @@
+#im golden freddy i like to scare and when i scare i become a nightmare
