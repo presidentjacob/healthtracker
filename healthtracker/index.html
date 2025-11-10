@@ -10,34 +10,19 @@
 
   <body>
     <main class="container">
-      <h1>Welcome to Tauri</h1>
-
-      <div class="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/src/assets/vite.svg" class="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img
-            src="/src/assets/tauri.svg"
-            class="logo tauri"
-            alt="Tauri logo"
-          />
-        </a>
-        <a href="https://www.typescriptlang.org/docs" target="_blank">
-          <img
-            src="/src/assets/typescript.svg"
-            class="logo typescript"
-            alt="typescript logo"
-          />
-        </a>
-      </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
-
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
+      <div id="name-section">
+      <h2>Welcome!</h2>
+      <form id="name-form">
+        <label for="name-input">Please enter your name:</label>
+        <input type="text" id="name-input" name="name" required />
+        <button type="submit">Submit</button>
       </form>
-      <p id="greet-msg"></p>
+    </div>
+
+    <!--Sample section for a hello-->
+    <div id="hello-section" style="display: none;">
+      <h2>Hello, <span id="user-name"></span></h2>
+    </div>
     </main>
   </body>
 </html>

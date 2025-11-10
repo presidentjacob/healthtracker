@@ -1,22 +1,47 @@
 import { invoke } from "@tauri-apps/api/core";
 
-let greetInputEl: HTMLInputElement | null;
-let greetMsgEl: HTMLElement | null;
+let nameInputEl: HTMLInputElement | null;
+let nameFormEl: HTMLFormElement | null;
+let nameSectionEl: HTMLElement | null;
+let userNameEl: HTMLElement | null;
+let helloGreetingSectionEl: HTMLElement | null; // change to log section
 
-async function greet() {
-  if (greetMsgEl && greetInputEl) {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsgEl.textContent = await invoke("greet", {
-      name: greetInputEl.value,
-    });
+function showNameSection() {
+  if (nameSectionEl && helloGreetingSectionEl) {
+    nameSectionEl.style.display = "block";
+    helloGreetingSectionEl.style.display = "none";
+  }
+}
+
+function showHelloSection(name: string) {
+  if (nameSectionEl && helloGreetingSectionEl && userNameEl) {
+    nameSectionEl.style.display = "none";
+    helloGreetingSectionEl.style.display = "block";
+    userNameEl.textContent = name;
   }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form")?.addEventListener("submit", (e) => {
+  nameInputEl = document.querySelector("#name-input");
+  nameFormEl = document.querySelector("#name-form");
+  nameSectionEl = document.querySelector("#name-section");
+  helloGreetingSectionEl = document.querySelector("#hello-section");
+  userNameEl = document.querySelector("#user-name");
+
+  const storedName = localStorage.getItem("user-name");
+  // Need to add a location to skip the name section if there is a stored name
+
+  if (storedName) {
+    showHelloSection(storedName);
+  } else {
+    showNameSection();
+  }
+
+  nameFormEl?.addEventListener("submit", (e) => {
     e.preventDefault();
-    greet();
+    if (nameInputEl && nameInputEl.value.trim()) {
+      localStorage.setItem("user-name", nameInputEl.value.trim());
+      showHelloSection(nameInputEl.value.trim());
+    }
   });
 });
