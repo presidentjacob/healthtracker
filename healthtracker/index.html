@@ -22,6 +22,31 @@
     <!--Sample section for a hello-->
     <div id="hello-section" style="display: none;">
       <h2>Hello, <span id="user-name"></span></h2>
+      <div class="calendar-container">
+        <button id="prev-month" class="calendar-nav">&lt;</button>
+        <div class="calendar-wrapper">
+          <div class="calendar-header">
+            <h3 id="month-year"></h3>
+          </div>
+          <table id="calendar">
+            <thead>
+              <tr>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+              </tr>
+            </thead>
+            <tbody id="calendar-body">
+              <!-- Calendar dates will be dynamically generated here -->
+            </tbody>
+          </table>
+        </div>
+        <button id="next-month" class="calendar-nav">&gt;</button>
+      </div>
     </div>
     </main>
   </body>
