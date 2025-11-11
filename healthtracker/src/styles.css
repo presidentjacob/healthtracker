@@ -186,3 +186,14 @@ button {
     margin: 0.5rem 0;
   }
 }
+
+#button-prompts button {
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  transition: transform 0.25s ease;
+}
+
+#button-prompts button:hover {
+  transform: scale(1.05);
+}

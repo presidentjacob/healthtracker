@@ -9,6 +9,7 @@ let currentMonthYearEl: HTMLElement | null;
 let calendarBody: HTMLElement | null;
 let prevMonthButton: HTMLElement | null;
 let nextMonthButton: HTMLElement | null;
+let todayDateEl: HTMLElement | null;
 let currentDate = new Date();
 
 function showNameSection() {
@@ -66,6 +67,18 @@ function renderCalendar(): void {
   }
 }
 
+function updateTodayDate(): void {
+  if (!todayDateEl) return;
+  const today = new Date();
+  // Format like: Weekday, Month Day, Year
+  todayDateEl.textContent = today.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   nameInputEl = document.querySelector("#name-input");
   nameFormEl = document.querySelector("#name-form");
@@ -77,6 +90,7 @@ window.addEventListener("DOMContentLoaded", () => {
   calendarBody = document.querySelector("#calendar-body");
   prevMonthButton = document.querySelector("#prev-month");
   nextMonthButton = document.querySelector("#next-month");
+  todayDateEl = document.querySelector("#today-date");
   const storedName = localStorage.getItem("user-name");
 
 
@@ -84,6 +98,8 @@ window.addEventListener("DOMContentLoaded", () => {
     showHelloSection(storedName);
     // render calendar when the hello section is shown
     renderCalendar();
+    // populate the Today date element
+    updateTodayDate();
   } else {
     showNameSection();
   }
