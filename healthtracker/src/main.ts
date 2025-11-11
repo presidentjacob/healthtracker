@@ -10,6 +10,10 @@ let calendarBody: HTMLElement | null;
 let prevMonthButton: HTMLElement | null;
 let nextMonthButton: HTMLElement | null;
 let todayDateEl: HTMLElement | null;
+let calorieModalEl: HTMLElement | null;
+let calorieFormEl: HTMLFormElement | null;
+let calorieCancelBtn: HTMLElement | null;
+let calorieFeedbackEl: HTMLElement | null;
 let currentDate = new Date();
 
 function showNameSection() {
@@ -91,6 +95,10 @@ window.addEventListener("DOMContentLoaded", () => {
   prevMonthButton = document.querySelector("#prev-month");
   nextMonthButton = document.querySelector("#next-month");
   todayDateEl = document.querySelector("#today-date");
+  calorieModalEl = document.querySelector("#calorie-modal");
+  calorieFormEl = document.querySelector("#calorie-form");
+  calorieCancelBtn = document.querySelector("#calorie-cancel");
+  calorieFeedbackEl = document.querySelector("#calorie-feedback");
   const storedName = localStorage.getItem("user-name");
 
 
@@ -124,5 +132,57 @@ window.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("user-name", nameInputEl.value.trim());
       showHelloSection(nameInputEl.value.trim());
     }
+  });
+
+  const logNutritionButton = document.querySelector("#log-nutrition");
+  logNutritionButton?.addEventListener("click", () => {
+    if (calorieModalEl) {
+      calorieModalEl.classList.add("active");
+    }
+  });
+
+  calorieCancelBtn?.addEventListener("click", () => {
+    if (calorieModalEl) {
+      calorieModalEl.classList.remove("active");
+    }
+  });
+
+  calorieFormEl?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const foodEl = document.querySelector<HTMLInputElement>("#calorie-food");
+    const calsEl = document.querySelector<HTMLInputElement>("#calorie-calories");
+    if (!foodEl || !calsEl) return;
+    const food = foodEl.value.trim();
+    const calories = Number(calsEl.value);
+    if (!food || Number.isNaN(calories)) {
+      if (calorieFeedbackEl) calorieFeedbackEl.textContent = "Please enter a food and a valid calorie amount.";
+      return;
+    }
+
+    // First try to invoke the Tauri command (works inside the Tauri app). If that fails
+    // (e.g. when running in the browser), fall back to saving to localStorage.
+    let savedToNative = false;
+    try {
+      // invoke returns any; we don't need the returned entries here
+      await invoke("log_calories", { food, calories });
+      savedToNative = true;
+      if (calorieFeedbackEl) calorieFeedbackEl.textContent = `Saved ${calories} cal to app storage.`;
+    } catch (err) {
+      // not running inside Tauri or command failed
+      savedToNative = false;
+    }
+
+    if (!savedToNative) {
+      const key = "calorie-entries";
+      const existingRaw = localStorage.getItem(key);
+      const existing = existingRaw ? JSON.parse(existingRaw) : [];
+      existing.push({ food, calories, timestamp: new Date().toISOString() });
+      localStorage.setItem(key, JSON.stringify(existing));
+      if (calorieFeedbackEl) calorieFeedbackEl.textContent = "Saved locally (app backend unavailable).";
+    }
+
+    // clear form and close modal after a moment
+    calorieFormEl?.reset();
+    setTimeout(() => { if (calorieModalEl) calorieModalEl.classList.remove("active"); }, 700);
   });
 });

@@ -51,9 +51,33 @@
       <div id="button-prompts">
         <button id="log-sleep">Log Sleep</button>
         <button id="log-exercise">Log Exercise</button>
-        <button id="log-nutrition">Log Nutrition</button>
+          <button id="log-nutrition">Log Nutrition</button>
       </div>
+
     </div>
-    </main>
+
+  </main>
+
+  <!-- Calorie logging modal (moved out of <main> so fixed positioning centers relative to viewport) -->
+  <div id="calorie-modal" class="modal-overlay">
+    <div class="modal">
+      <h3>Log Calories</h3>
+      <form id="calorie-form">
+        <label for="calorie-food">Food / Meal</label>
+        <input id="calorie-food" name="food" type="text" required />
+
+        <label for="calorie-calories">Calories</label>
+        <input id="calorie-calories" name="calories" type="number" min="0" required />
+
+        <div class="modal-actions">
+          <button type="submit">Save</button>
+          <button type="button" id="calorie-cancel">Cancel</button>
+        </div>
+      </form>
+      <div id="calorie-feedback" class="muted" aria-live="polite"></div>
+    </div>
+  </div>
+
+  </body>
   </body>
 </html>
