@@ -102,8 +102,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
-
   nameFormEl?.addEventListener("submit", (e) => {
     e.preventDefault();
     if (nameInputEl && nameInputEl.value.trim()) {

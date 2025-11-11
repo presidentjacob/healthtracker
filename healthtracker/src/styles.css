@@ -52,9 +52,9 @@ a {
   text-decoration: inherit;
 }
 
-a:hover {
+/* a:hover {
   color: #535bf2;
-}
+} */
 
 h1 {
   text-align: center;
@@ -78,14 +78,6 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
 input,
 button {
   outline: none;
@@ -101,9 +93,9 @@ button {
     background-color: #2f2f2f;
   }
 
-  a:hover {
+  /*a:hover {
     color: #24c8db;
-  }
+  } */
 
   input,
   button {
@@ -115,29 +107,7 @@ button {
   }
 }
 
-button.prev-month, button.next-month {
-    font-size: 2rem;
-    background: var(--light-gray);
-    border-radius: 100%;
-    cursor: pointer;
-    color: var(--dark-gray);
-    z-index: 10;
-    transition: transition 0.5s ease, color 0.5s ease, background-color 0.5s ease;
-}
 
-button.prev-month {
-    left: -60px;
-}
-
-button.next-month {
-    right: -60px;
-}
-
-button.prev-month:hover, button.next-month:hover {
-    color: var(--black);
-    background-color: var(--gray);
-    transform: scale(1.2);
-}
 
 /* Calendar layout: place prev/next to left/right of calendar */
 .calendar-container {
@@ -149,19 +119,43 @@ button.prev-month:hover, button.next-month:hover {
 }
 
 .calendar-nav {
+  size: .5rem;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 0.8em;
-  background-color: #ffffff;
+  background-color: #2f2f2f;
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1;
   cursor: pointer;
+  transition: transform 0.25s ease, color 0.25s ease, background-color 0.25s ease;
 }
 
-.calendar-nav:hover {
-  border-color: #396cd8;
-  transform: translateY(-1px);
+#prev-month, #next-month {
+  font-size: 2rem;
+  background: #4d4d4d;
+  border-radius: 100%;
+  cursor: pointer;
+  color: #2f2f2f;
+  z-index: 10;
+  display: inline-block;
+  /* ensure transform has an initial value so transitions work */
+  transform: scale(1);
+  will-change: transform;
+  /* include transform in the transition so scaling animates */
+  transition: transform 0.25s ease;
+}
+
+#prev-month {
+    left: -60px;
+}
+
+#next-month {
+    right: -60px;
+}
+
+#prev-month:hover, #next-month:hover {
+  transform: scale(1.2);
 }
 
 .calendar-wrapper {
