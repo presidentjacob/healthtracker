@@ -40,6 +40,11 @@ function renderCalendar(): void {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  // Today's date (real current date) used for highlighting
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth();
+  const todayDateNum = today.getDate();
 
   // Update header (month name and year)
   currentMonthYearEl.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`;
@@ -61,6 +66,11 @@ function renderCalendar(): void {
         cell.textContent = '';
       } else {
         cell.textContent = date.toString();
+        // highlight the cell if it is today's date and we're rendering the current month/year
+        if (year === todayYear && month === todayMonth && date === todayDateNum) {
+          cell.classList.add('today');
+          cell.setAttribute('aria-current', 'date');
+        }
         date++;
       }
       row.appendChild(cell);

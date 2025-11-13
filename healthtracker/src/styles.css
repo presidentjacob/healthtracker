@@ -177,6 +177,15 @@ button {
   text-align: center;
 }
 
+/* highlight today's date */
+#calendar td.today {
+  background-color: #e6f9ec; /* soft green background */
+  color: #0b6b33; /* dark green text */
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px rgba(11,107,51,0.06);
+  border-radius: 6px;
+}
+
 /* responsive: stack on small screens */
 @media (max-width: 520px) {
   .calendar-container {
