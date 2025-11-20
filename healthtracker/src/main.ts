@@ -20,6 +20,10 @@ let calorieFormEl: HTMLFormElement | null;
 let calorieCancelBtn: HTMLElement | null;
 let calorieFeedbackEl: HTMLElement | null;
 let calorieDateInput: HTMLInputElement | null;
+let workoutModalEl: HTMLElement | null;
+let workoutFormEl: HTMLFormElement | null;
+let workoutCancelBtn: HTMLElement | null;
+let workoutFeedbackEl: HTMLElement | null;
 let viewEntriesModalEl: HTMLElement | null;
 let entriesListEl: HTMLElement | null;
 let entriesDateHeadingEl: HTMLElement | null;
@@ -139,6 +143,18 @@ async function getSleepEntries(): Promise<any[]> {
   }
 
   const raw = localStorage.getItem('sleep-entries');
+  return raw ? JSON.parse(raw) : [];
+}
+
+// Get workout entries from native backend or localStorage
+async function getWorkoutEntries(): Promise<any[]> {
+  try {
+    const native = await invoke('get_workouts');
+    if (Array.isArray(native)) return native;
+  } catch (err) {
+    // ignore - fallback to localStorage
+  }
+  const raw = localStorage.getItem('workout-entries');
   return raw ? JSON.parse(raw) : [];
 }
 
