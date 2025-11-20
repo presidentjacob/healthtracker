@@ -23,6 +23,7 @@ let calorieDateInput: HTMLInputElement | null;
 let workoutModalEl: HTMLElement | null;
 let workoutFormEl: HTMLFormElement | null;
 let workoutCancelBtn: HTMLElement | null;
+let workoutDateInput: HTMLInputElement | null;
 let workoutFeedbackEl: HTMLElement | null;
 let viewEntriesModalEl: HTMLElement | null;
 let entriesListEl: HTMLElement | null;
@@ -172,6 +173,7 @@ async function openViewModal(dateStr: string) {
   // load both nutrition and sleep entries for the date and render grouped
   const calorieEntries = await getCalorieEntries();
   const sleepEntries = await getSleepEntries();
+  const workoutEntries = await getWorkoutEntries();
 
   const dayCalories = calorieEntries.filter((e: any) => (e.timestamp || '').startsWith(dateStr));
   const daySleep = sleepEntries.filter((e: any) => (e.timestamp || '').startsWith(dateStr));
@@ -216,6 +218,28 @@ async function openViewModal(dateStr: string) {
     }
     container.appendChild(list);
   }
+
+  // Workout section
+  const workoutHeading = document.createElement('h4');
+  workoutHeading.textContent = 'Workouts';
+  container.appendChild(workoutHeading);
+  const dayWorkouts = workoutEntries.filter((e: any) => (e.timestamp || '').startsWith(dateStr));
+  if (dayWorkouts.length === 0) {
+    const p = document.createElement('p');
+    p.textContent = 'No workout entries for this date.';
+    container.appendChild(p);
+  } else {
+    const list = document.createElement('ul');
+    for (const e of dayWorkouts) {
+      const li = document.createElement('li');
+      const time = e.timestamp ? new Date(e.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      li.textContent = `${time} — ${e.type} (${e.duration} minutes)`;
+      list.appendChild(li);
+    }
+    container.appendChild(list);
+  }
+
+  // render content
 
   entriesListEl.innerHTML = '';
   entriesListEl.appendChild(container);
@@ -270,6 +294,11 @@ window.addEventListener("DOMContentLoaded", () => {
   sleepCancelBtn = document.querySelector("#sleep-cancel");
   sleepFeedbackEl = document.querySelector("#sleep-feedback");
   sleepDateInput = document.querySelector('#sleep-date');
+  workoutModalEl = document.querySelector("#workout-modal");
+  workoutFormEl = document.querySelector("#workout-form");
+  workoutCancelBtn = document.querySelector("#workout-cancel");
+  workoutFeedbackEl = document.querySelector("#workout-feedback");
+  workoutDateInput = document.querySelector('#workout-date');
   viewEntriesModalEl = document.querySelector('#view-entries-modal');
   entriesListEl = document.querySelector('#entries-list');
   entriesDateHeadingEl = document.querySelector('#entries-date-heading');
@@ -278,6 +307,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const storedName = localStorage.getItem("user-name");
   const logNutritionButton = document.querySelector("#log-nutrition");
   const logSleepButton = document.querySelector("#log-sleep");
+  const logWorkoutButton = document.querySelector("#log-exercise");
 
 
   if (storedName) {
@@ -312,6 +342,8 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // -------------------------------------------------------------------------------
+
   logNutritionButton?.addEventListener("click", () => {
     if (calorieModalEl) {
       // clear any previously-set date when opened from the main button
@@ -342,6 +374,21 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // -------------------------------------------------------------------------------
+
+  logWorkoutButton?.addEventListener("click", () => {
+    if (workoutModalEl) {
+      // clear any previously-set date when opened from the main button
+      if (workoutDateInput) workoutDateInput.value = '';
+      workoutModalEl.classList.add("active");
+    }
+  });
+
+  workoutCancelBtn?.addEventListener("click", () => {
+    if (workoutModalEl) {
+      workoutModalEl.classList.remove("active");
+    }
+  });
 
   closeEntriesBtn?.addEventListener('click', () => closeViewModal());
 
@@ -442,5 +489,48 @@ window.addEventListener("DOMContentLoaded", () => {
     if (sleepDateInput) sleepDateInput.value = '';
     await renderCalendar();
     setTimeout(() => { if (sleepModalEl) sleepModalEl.classList.remove("active"); }, 700);
+  });
+
+  workoutFormEl?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const workoutTypeEl = document.querySelector<HTMLInputElement>("#workout-type");
+    const workoutDurationEl = document.querySelector<HTMLInputElement>("#workout-duration");
+
+    if (!workoutTypeEl || !workoutDurationEl) return;
+    const workoutType = workoutTypeEl.value.trim();
+    const workoutDuration = Number(workoutDurationEl.value);
+    if (!workoutType || Number.isNaN(workoutDuration)) {
+      if (workoutFeedbackEl) workoutFeedbackEl.textContent = "Please enter a workout type and a valid duration.";
+      return;
+    }
+
+    // for simplicty, we'll log sleep data to localStorage
+    let savedToNative = false;
+    try {
+      const dateVal = (document.querySelector('#workout-date') as HTMLInputElement | null)?.value;
+      const payload: any = { type: workoutType, duration: workoutDuration };
+      if (dateVal) payload.date = dateVal;
+      await invoke("log_workout", payload);
+      savedToNative = true;
+      if (workoutFeedbackEl) workoutFeedbackEl.textContent = `Saved ${workoutType} workout to app storage.`;
+    } catch (err) {
+      savedToNative = false;
+    }
+
+    if (!savedToNative) {
+      const key = "workout-entries";
+      const existingRaw = localStorage.getItem(key);
+      const existing = existingRaw ? JSON.parse(existingRaw) : [];
+      const dateVal = (document.querySelector('#workout-date') as HTMLInputElement | null)?.value;
+      const timestamp = dateVal ? new Date(dateVal + 'T12:00:00').toISOString() : new Date().toISOString();
+      existing.push({ type: workoutType, duration: workoutDuration, timestamp });
+      localStorage.setItem(key, JSON.stringify(existing));
+      if (workoutFeedbackEl) workoutFeedbackEl.textContent = "Saved locally (app backend unavailable).";
+    }
+
+    workoutFormEl?.reset();
+    if (workoutDateInput) workoutDateInput.value = '';
+    await renderCalendar();
+    setTimeout(() => { if (workoutModalEl) workoutModalEl.classList.remove("active"); }, 700);
   });
 });
