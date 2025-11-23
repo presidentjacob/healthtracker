@@ -11,129 +11,140 @@
   <body>
     <main class="container">
       <div id="name-section">
-      <h2>Welcome!</h2>
-      <form id="name-form">
-        <label for="name-input">Please enter your name:</label>
-        <input type="text" id="name-input" name="name" required />
-        <button type="submit">Submit</button>
-      </form>
-    </div>
+        <h2>Welcome!</h2>
+        <form id="name-form">
+          <label for="name-input">Please enter your name:</label>
+          <input type="text" id="name-input" name="name" required />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
 
-    <!--Sample section for a hello-->
-    <div id="hello-section" style="display: none;">
-      <h2>Hello, <span id="user-name"></span></h2>
-      <h3>Today is <span id="today-date"></span></h3>
-      <div class="calendar-container">
-        <button id="prev-month" class="calendar-nav">&lt;</button>
-        <div class="calendar-wrapper">
-          <div class="calendar-header">
-            <h3 id="month-year"></h3>
+      <!--Sample section for a hello-->
+      <div id="hello-section" style="display: none;">
+        <h2>Hello, <span id="user-name"></span></h2>
+        <h3>Today is <span id="today-date"></span></h3>
+
+        <div class="calendar-container">
+          <button id="prev-month" class="calendar-nav">&lt;</button>
+          <div class="calendar-wrapper">
+            <div class="calendar-header">
+              <h3 id="month-year"></h3>
+            </div>
+            <table id="calendar">
+              <thead>
+                <tr>
+                  <th>Sun</th>
+                  <th>Mon</th>
+                  <th>Tue</th>
+                  <th>Wed</th>
+                  <th>Thu</th>
+                  <th>Fri</th>
+                  <th>Sat</th>
+                </tr>
+              </thead>
+              <tbody id="calendar-body">
+                <!-- Calendar dates will be dynamically generated here -->
+              </tbody>
+            </table>
           </div>
-          <table id="calendar">
-            <thead>
-              <tr>
-                <th>Sun</th>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-              </tr>
-            </thead>
-            <tbody id="calendar-body">
-              <!-- Calendar dates will be dynamically generated here -->
-            </tbody>
-          </table>
+          <button id="next-month" class="calendar-nav">&gt;</button>
         </div>
-        <button id="next-month" class="calendar-nav">&gt;</button>
+
+        <!-- weekly/monthly averages side summary -->
+        <section id="summary-panel">
+          <h4>Weekly Summary</h4>
+          <div id="weekly-summary" class="summary-box"></div>
+
+          <h4>Monthly Summary</h4>
+          <div id="monthly-summary" class="summary-box"></div>
+        </section>
+
+        <div id="button-prompts">
+          <button id="log-sleep">Log Sleep</button>
+          <button id="log-exercise">Log Exercise</button>
+          <button id="log-nutrition">Log Nutrition</button>
+        </div>
       </div>
-      <div id="button-prompts">
-        <button id="log-sleep">Log Sleep</button>
-        <button id="log-exercise">Log Exercise</button>
-        <button id="log-nutrition">Log Nutrition</button>
+    </main>
+
+    <!-- Calorie logging modal-->
+    <div id="calorie-modal" class="modal-overlay">
+      <div class="modal">
+        <h3>Log Calories</h3>
+        <form id="calorie-form">
+          <label for="calorie-food">Food / Meal</label>
+          <input id="calorie-food" name="food" type="text" required />
+
+          <label for="calorie-calories">Calories</label>
+          <input id="calorie-calories" name="calories" type="number" min="0" required />
+
+          <!-- optional date for logging against a specific day -->
+          <input id="calorie-date" name="date" type="date" hidden />
+
+          <div class="modal-actions">
+            <button type="submit">Save</button>
+            <button type="button" id="calorie-cancel">Cancel</button>
+          </div>
+        </form>
+        <div id="calorie-feedback" class="muted" aria-live="polite"></div>
       </div>
     </div>
-     </main>
 
-  <!-- Calorie logging modal-->
-  <div id="calorie-modal" class="modal-overlay">
-    <div class="modal">
-      <h3>Log Calories</h3>
-      <form id="calorie-form">
-        <label for="calorie-food">Food / Meal</label>
-        <input id="calorie-food" name="food" type="text" required />
+    <!-- Sleep logging modal-->
+    <div id="sleep-modal" class="modal-overlay">
+      <div class="modal">
+        <h3>Log Sleep</h3>
+        <form id="sleep-form">
+          <label for="sleep-hours">Hours Slept</label>
+          <input id="sleep-hours" name="hours" type="number" min="0" step="0.1" required />
 
-        <label for="calorie-calories">Calories</label>
-        <input id="calorie-calories" name="calories" type="number" min="0" required />
-        
-        <!-- optional date for logging against a specific day -->
-        <input id="calorie-date" name="date" type="date" hidden />
+          <!-- optional date for logging against a specific day -->
+          <input id="sleep-date" name="date" type="date" hidden />
 
+          <div class="modal-actions">
+            <button type="submit">Save</button>
+            <button type="button" id="sleep-cancel">Cancel</button>
+          </div>
+        </form>
+        <div id="sleep-feedback" class="muted" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Workout logging modal-->
+    <div id="workout-modal" class="modal-overlay">
+      <div class="modal">
+        <h3>Log Workout</h3>
+        <form id="workout-form">
+          <label for="workout-duration">Workout Duration (minutes)</label>
+          <input id="workout-duration" name="duration" type="number" min="0" step="1" required />
+
+          <label for="workout-type">Workout Type</label>
+          <input id="workout-type" name="type" type="text" placeholder="Type of Workout" required />
+
+          <!-- optional date for logging against a specific day -->
+          <input id="workout-date" name="date" type="date" hidden />
+
+          <div class="modal-actions">
+            <button type="submit">Save</button>
+            <button type="button" id="workout-cancel">Cancel</button>
+          </div>
+        </form>
+        <div id="workout-feedback" class="muted" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- View entries for a selected date -->
+    <div id="view-entries-modal" class="modal-overlay" aria-hidden="true">
+      <div class="modal">
+        <h3 id="entries-date-heading">Entries</h3>
+        <div id="entries-list">
+          <!-- entries will be inserted here -->
+        </div>
         <div class="modal-actions">
-          <button type="submit">Save</button>
-          <button type="button" id="calorie-cancel">Cancel</button>
+          <button id="add-entry-for-date" type="button">Add Entry for This Date</button>
+          <button id="close-entries" type="button">Close</button>
         </div>
-      </form>
-      <div id="calorie-feedback" class="muted" aria-live="polite"></div>
-    </div>
-  </div>
-
-  <!-- Sleep logging modal-->
-  <div id="sleep-modal" class="modal-overlay">
-    <div class="modal">
-      <h3>Log Sleep</h3>
-      <form id="sleep-form">
-        <label for="sleep-hours">Hours Slept</label>
-        <input id="sleep-hours" name="hours" type="number" min="0" step="0.1" required />
-
-        <!-- optional date for logging against a specific day -->
-        <input id="sleep-date" name="date" type="date" hidden />
-
-        <div class="modal-actions">
-          <button type="submit">Save</button>
-          <button type="button" id="sleep-cancel">Cancel</button>
-        </div>
-      </form>
-      <div id="sleep-feedback" class="muted" aria-live="polite"></div>
-    </div>
-  </div>
-
-  <!-- Workout logging modal-->
-  <div id="workout-modal" class="modal-overlay">
-    <div class="modal">
-      <h3>Log Workout</h3>
-      <form id="workout-form">
-        <label for="workout-hours">Hours Worked Out</label>
-        <input id="workout-hours" name="hours" type="number" min="0" step="0.1" required />
-
-        <label for="calorie-calories">Workout Type</label>
-        <input id="workout-type" name="type" type="text" placeholder="Type of Workout" required />
-
-        <!-- optional date for logging against a specific day -->
-        <input id="workout-date" name="date" type="date" hidden />
-
-        <div class="modal-actions">
-          <button type="submit">Save</button>
-          <button type="button" id="workout-cancel">Cancel</button>
-        </div>
-      </form>
-      <div id="workout-feedback" class="muted" aria-live="polite"></div>
-    </div>
-  </div>
-  
-  <!-- View entries for a selected date -->
-  <div id="view-entries-modal" class="modal-overlay" aria-hidden="true">
-    <div class="modal">
-      <h3 id="entries-date-heading">Entries</h3>
-      <div id="entries-list">
-        <!-- entries will be inserted here -->
-      </div>
-      <div class="modal-actions">
-        <button id="add-entry-for-date" type="button">Add Entry for This Date</button>
-        <button id="close-entries" type="button">Close</button>
       </div>
     </div>
-  </div>
   </body>
 </html>
