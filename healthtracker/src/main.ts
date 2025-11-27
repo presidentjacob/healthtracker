@@ -452,6 +452,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const logNutritionButton = document.querySelector("#log-nutrition");
   const logSleepButton = document.querySelector("#log-sleep");
   const logWorkoutButton = document.querySelector("#log-exercise");
+  console.debug('logWorkoutButton element', logWorkoutButton);
 
   if (storedName) {
     showHelloSection(storedName);
@@ -516,6 +517,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   logWorkoutButton?.addEventListener("click", () => {
+    console.debug('logWorkoutButton clicked');
     if (workoutModalEl) {
       if (workoutDateInput) workoutDateInput.value = "";
       workoutModalEl.classList.add("active");
