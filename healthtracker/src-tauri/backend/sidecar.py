@@ -12,7 +12,23 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from functions import log_calories, log_sleep, log_workout, load_data
-from config import CALORIE_FILE, SLEEP_FILE, WORKOUT_FILE
+from functions import (
+    log_calories,
+    log_sleep,
+    log_workout,
+    load_data,
+    get_calorie_averages,
+    get_sleep_averages,
+    get_workout_averages,
+)
+from config import CALORIE_FILE, SLEEP_FILE, WORKOUT_FILE, DATA_PATH
+
+# print where files are being stored (stderr) to avoid contaminating stdout JSON
+try:
+    sys.stderr.write(f"[sidecar] DATA_PATH={DATA_PATH}\n")
+    sys.stderr.flush()
+except Exception:
+    pass
 
 
 def get_calories():
@@ -37,9 +53,10 @@ def handle_command(cmd_dict):
     if cmd == "log_calories":
         food = cmd_dict.get("food")
         calories = cmd_dict.get("calories")
+        date = cmd_dict.get("date")
         if food is None or calories is None:
             return {"error": "Missing food or calories"}
-        return {"success": True, "data": log_calories(food, int(calories))}
+        return {"success": True, "data": log_calories(food, int(calories), date)}
     
     elif cmd == "get_calories":
         return {"success": True, "data": get_calories()}
@@ -47,23 +64,42 @@ def handle_command(cmd_dict):
     elif cmd == "log_sleep":
         hours = cmd_dict.get("hours")
         quality = cmd_dict.get("quality")
-        if hours is None or quality is None:
-            return {"error": "Missing hours or quality"}
-        return {"success": True, "data": log_sleep(int(hours), quality)}
+        date = cmd_dict.get("date")
+        if hours is None:
+            return {"error": "Missing hours"}
+        # quality is optional and will default in the functions layer
+        try:
+            return {"success": True, "data": log_sleep(float(hours), quality, date)}
+        except Exception as e:
+            return {"error": f"Failed to log sleep: {e}"}
     
     elif cmd == "get_sleep":
         return {"success": True, "data": get_sleep()}
     
     elif cmd == "log_workout":
-        exercise = cmd_dict.get("exercise")
+        # accept `exercise` or `type` from frontend
+        exercise = cmd_dict.get("exercise") or cmd_dict.get("type")
         duration = cmd_dict.get("duration")
         intensity = cmd_dict.get("intensity")
-        if any(x is None for x in [exercise, duration, intensity]):
-            return {"error": "Missing exercise, duration, or intensity"}
-        return {"success": True, "data": log_workout(exercise, int(duration), intensity)}
+        date = cmd_dict.get("date")
+        if exercise is None or duration is None:
+            return {"error": "Missing exercise or duration"}
+        try:
+            return {"success": True, "data": log_workout(exercise, float(duration), intensity, date)}
+        except Exception as e:
+            return {"error": f"Failed to log workout: {e}"}
     
     elif cmd == "get_workouts":
         return {"success": True, "data": get_workouts()}
+
+    elif cmd == "get_calorie_averages":
+        return {"success": True, "data": get_calorie_averages()}
+
+    elif cmd == "get_sleep_averages":
+        return {"success": True, "data": get_sleep_averages()}
+
+    elif cmd == "get_workout_averages":
+        return {"success": True, "data": get_workout_averages()}
     
     else:
         return {"error": f"Unknown command: {cmd}"}

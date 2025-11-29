@@ -1,17 +1,30 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use std::io::Write;
 use std::process::{Command, Stdio};
+use std::env;
+use std::path::PathBuf;
 use serde_json::json;
 use serde_json::Value as JsonValue;
 
 fn run_python_sidecar(cmd: &JsonValue) -> Result<JsonValue, String> {
-    // spawn `python backend/sidecar.py` (requires python available in PATH)
-    let mut child = Command::new("python")
-        .arg("backend/sidecar.py")
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()
-        .map_err(|e| format!("failed to spawn sidecar: {}", e))?;
+    // compute sidecar path from CARGO_MANIFEST_DIR (points to src-tauri folder)
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let sidecar_path: PathBuf = PathBuf::from(manifest_dir).join("backend").join("sidecar.py");
+    let sidecar_arg = sidecar_path.to_str().ok_or_else(|| format!("invalid sidecar path {}", sidecar_path.display()))?;
+
+    // try common python executables on Windows / Linux / macOS
+    let candidates = ["python", "py", "python3"];
+    let mut child_opt = None;
+    let mut last_err = None;
+    for cand in &candidates {
+        let mut cb = Command::new(cand);
+        cb.arg(sidecar_arg).stdin(Stdio::piped()).stdout(Stdio::piped());
+        match cb.spawn() {
+            Ok(child) => { child_opt = Some(child); break; }
+            Err(e) => { last_err = Some(format!("spawn {} failed: {}", cand, e)); }
+        }
+    }
+    let mut child = child_opt.ok_or_else(|| format!("failed to spawn python sidecar (tried {})", candidates.join(",")))?;
 
     // write command JSON + newline
     if let Some(mut stdin) = child.stdin.take() {
@@ -27,7 +40,22 @@ fn run_python_sidecar(cmd: &JsonValue) -> Result<JsonValue, String> {
     if stdout.trim().is_empty() {
         return Err("sidecar returned empty output".into());
     }
-    serde_json::from_str(&stdout).map_err(|e| format!("failed to parse sidecar json: {} (raw: {})", e, stdout))
+    let parsed: serde_json::Value = serde_json::from_str(&stdout)
+        .map_err(|e| format!("failed to parse sidecar json: {} (raw: {})", e, stdout))?;
+
+    // If the sidecar returns { success: true, data: ... }, unwrap data
+    if let Some(success) = parsed.get("success") {
+        if success.as_bool().unwrap_or(false) {
+            if let Some(data) = parsed.get("data") {
+                return Ok(data.clone());
+            }
+        } else {
+            if let Some(err_msg) = parsed.get("message").or_else(|| parsed.get("error")) {
+                return Err(format!("sidecar error: {}", err_msg));
+            }
+        }
+    }
+    Ok(parsed)
 }
 
 #[tauri::command]

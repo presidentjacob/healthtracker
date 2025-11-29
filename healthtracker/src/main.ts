@@ -119,10 +119,15 @@ async function renderCalendar(): Promise<void> {
         cell.textContent = date.toString();
 
         const cellDate = new Date(year, month, date);
-        const cellDateStr = cellDate.toISOString().slice(0, 10); // YYYY-MM-DD
+        const cellDateStr = `${cellDate.getFullYear()}-${String(cellDate.getMonth()+1).padStart(2,'0')}-${String(cellDate.getDate()).padStart(2,'0')}`;
         cell.setAttribute("data-date", cellDateStr);
 
         const matching = entries.filter((e: any) => (e.timestamp || "").startsWith(cellDateStr));
+        // Keep cell simple: mark with class if any entries exist
+        if (matching.length > 0) {
+          // We don't show numeric badges in the calendar to avoid visual clutter.
+          // The `has-entry` class is applied already; the detailed entries appear on click.
+        }
         if (matching.length > 0) {
           cell.classList.add("has-entry");
           cell.setAttribute("data-count", String(matching.length));
@@ -205,6 +210,9 @@ async function updateAverages(): Promise<void> {
       invoke<any>("get_sleep_averages"),
       invoke<any>("get_workout_averages"),
     ]);
+    if (calAvgs && calAvgs.data) calAvgs = calAvgs.data;
+    if (sleepAvgs && sleepAvgs.data) sleepAvgs = sleepAvgs.data;
+    if (workoutAvgs && workoutAvgs.data) workoutAvgs = workoutAvgs.data;
   } catch {
     const [calEntries, sleepEntries, workoutEntries] = await Promise.all([
       getCalorieEntries(),
@@ -268,6 +276,7 @@ async function getCalorieEntries(): Promise<any[]> {
   try {
     const native = await invoke<any>("get_calories");
     if (Array.isArray(native)) return native;
+    if (native && Array.isArray(native.data)) return native.data;
   } catch (err) {
     // ignore - fallback to localstorage
   }
@@ -281,6 +290,7 @@ async function getSleepEntries(): Promise<any[]> {
   try {
     const native = await invoke<any>("get_sleep");
     if (Array.isArray(native)) return native;
+    if (native && Array.isArray(native.data)) return native.data;
   } catch (err) {
     // ignore - fallback to localstorage
   }
@@ -294,6 +304,7 @@ async function getWorkoutEntries(): Promise<any[]> {
   try {
     const native = await invoke<any>("get_workouts");
     if (Array.isArray(native)) return native;
+    if (native && Array.isArray(native.data)) return native.data;
   } catch (err) {
     // ignore - fallback to localstorage
   }
@@ -388,8 +399,10 @@ async function openViewModal(dateStr: string) {
   entriesListEl.innerHTML = "";
   entriesListEl.appendChild(container);
 
-  // set hidden date input so adding an entry will default to this date
+  // set hidden date inputs so adding an entry will default to this date
   calorieDateInput.value = dateStr;
+  if (sleepDateInput) sleepDateInput.value = dateStr;
+  if (workoutDateInput) workoutDateInput.value = dateStr;
 
   viewEntriesModalEl.classList.add("active");
   viewEntriesModalEl.setAttribute("aria-hidden", "false");
@@ -556,7 +569,8 @@ window.addEventListener("DOMContentLoaded", () => {
       const dateVal = (document.querySelector("#calorie-date") as HTMLInputElement | null)?.value;
       const payload: any = { food, calories };
       if (dateVal) payload.date = dateVal;
-      await invoke("log_calories", payload);
+      const res = await invoke<any>("log_calories", payload);
+      console.debug("log_calories result:", res);
       savedToNative = true;
       if (calorieFeedbackEl) calorieFeedbackEl.textContent = `Saved ${calories} cal to app storage.`;
     } catch (err) {
@@ -599,7 +613,8 @@ window.addEventListener("DOMContentLoaded", () => {
       const dateVal = (document.querySelector("#sleep-date") as HTMLInputElement | null)?.value;
       const payload: any = { hours: sleepHours };
       if (dateVal) payload.date = dateVal;
-      await invoke("log_sleep", payload);
+      const res = await invoke<any>("log_sleep", payload);
+      console.debug("log_sleep result:", res);
       savedToNative = true;
       if (sleepFeedbackEl) sleepFeedbackEl.textContent = `Saved ${sleepHours} hours to app storage.`;
     } catch (err) {
@@ -644,7 +659,8 @@ window.addEventListener("DOMContentLoaded", () => {
       const dateVal = (document.querySelector("#workout-date") as HTMLInputElement | null)?.value;
       const payload: any = { type: workoutType, duration: workoutDuration };
       if (dateVal) payload.date = dateVal;
-      await invoke("log_workout", payload);
+      const res = await invoke<any>("log_workout", payload);
+      console.debug("log_workout result:", res);
       savedToNative = true;
       if (workoutFeedbackEl) workoutFeedbackEl.textContent = `Saved ${workoutType} workout to app storage.`;
     } catch (err) {
