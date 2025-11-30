@@ -30,37 +30,37 @@ try:
 except Exception:
     pass
 
-
+# read functions
 def get_calories():
-    """Read and return all calorie entries."""
     return load_data(CALORIE_FILE)
 
-
+# read functions
 def get_sleep():
-    """Read and return all sleep entries."""
     return load_data(SLEEP_FILE)
 
-
+# read functions
 def get_workouts():
-    """Read and return all workout entries."""
     return load_data(WORKOUT_FILE)
 
-
+# Execute commands and return the results
 def handle_command(cmd_dict):
-    """Execute a command and return the result."""
     cmd = cmd_dict.get("command")
     
+    # Handle each command
     if cmd == "log_calories":
         food = cmd_dict.get("food")
         calories = cmd_dict.get("calories")
         date = cmd_dict.get("date")
+        # validate inputs if missing and return error
         if food is None or calories is None:
             return {"error": "Missing food or calories"}
         return {"success": True, "data": log_calories(food, int(calories), date)}
     
+    # Get calories log
     elif cmd == "get_calories":
         return {"success": True, "data": get_calories()}
     
+    # Log sleep entry
     elif cmd == "log_sleep":
         hours = cmd_dict.get("hours")
         quality = cmd_dict.get("quality")
@@ -76,6 +76,7 @@ def handle_command(cmd_dict):
     elif cmd == "get_sleep":
         return {"success": True, "data": get_sleep()}
     
+    # Log workout entry
     elif cmd == "log_workout":
         # accept `exercise` or `type` from frontend
         exercise = cmd_dict.get("exercise") or cmd_dict.get("type")
@@ -106,17 +107,20 @@ def handle_command(cmd_dict):
 
 
 def main():
-    """Main loop: read JSON commands from stdin, write JSON responses to stdout."""
+    #Main loop: read JSON commands from stdin, write JSON responses to stdout.
     for line in sys.stdin:
+        # Skip empty lines
         try:
             cmd_dict = json.loads(line.strip())
             result = handle_command(cmd_dict)
             print(json.dumps(result))
             sys.stdout.flush()
+        # Ensure that JSON decode errors are caught and reported
         except json.JSONDecodeError as e:
             error_response = {"error": f"Invalid JSON: {e}"}
             print(json.dumps(error_response))
             sys.stdout.flush()
+        # Catch all other exceptions to avoid crashing the sidecar
         except Exception as e:
             error_response = {"error": str(e)}
             print(json.dumps(error_response))

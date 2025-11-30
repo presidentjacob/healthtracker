@@ -87,6 +87,7 @@ def _normalize_timestamp(date_val=None):
 # Helper: calculate weekly/monthly averages by date and numeric key
 def _calculate_averages(entries, value_key):
     daily_totals = {}
+    # Aggregate totals by day
     for e in entries:
         ts = e.get("timestamp")
         if not ts:
@@ -97,6 +98,7 @@ def _calculate_averages(entries, value_key):
             continue
         daily_totals[d] = daily_totals.get(d, 0.0) + float(e.get(value_key, 0.0))
 
+    # Aggregate into weekly and monthly averages
     weekly_raw = {}
     monthly_raw = {}
     for d, total in daily_totals.items():
@@ -111,6 +113,7 @@ def _calculate_averages(entries, value_key):
         monthly_raw[month_key]["sum"] += total
         monthly_raw[month_key]["days"] += 1
 
+    # Compute averages
     weekly = {k: v["sum"]/v["days"] for k, v in weekly_raw.items() if v["days"]>0}
     monthly = {k: v["sum"]/v["days"] for k, v in monthly_raw.items() if v["days"]>0}
     return {"weekly": weekly, "monthly": monthly}
