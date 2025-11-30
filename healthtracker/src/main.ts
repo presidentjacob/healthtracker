@@ -123,21 +123,23 @@ async function renderCalendar(): Promise<void> {
         cell.setAttribute("data-date", cellDateStr);
 
         const matching = entries.filter((e: any) => (e.timestamp || "").startsWith(cellDateStr));
-        // Keep cell simple: mark with class if any entries exist
+        // mark with class if any entries exist
         if (matching.length > 0) {
           // We don't show numeric badges in the calendar to avoid visual clutter.
-          // The `has-entry` class is applied already; the detailed entries appear on click.
+          // The `has-entry` class is applied already, the detailed entries appear on click.
         }
         if (matching.length > 0) {
           cell.classList.add("has-entry");
           cell.setAttribute("data-count", String(matching.length));
         }
 
+        // Highlight today
         if (year === todayYear && month === todayMonth && date === todayDateNum) {
           cell.classList.add("today");
           cell.setAttribute("aria-current", "date");
         }
 
+        // Add a click handler to open the view entries modal
         cell.addEventListener("click", () => {
           openViewModal(cellDateStr);
         });
@@ -256,17 +258,21 @@ async function updateAverages(): Promise<void> {
     month: "long",
   })} ${currentDate.getFullYear()}:`;
 
-  weeklySummaryEl.textContent =
-    `${weekLabel} ` +
-    `avg calories/day ${weekCal.toFixed(0)}, ` +
-    `avg sleep ${weekSleep.toFixed(1)} hrs/day, ` +
-    `avg workout ${weekWorkout.toFixed(1)} min/day`;
+  // show the weekly summary metrics on their own lines for readability
+  weeklySummaryEl.innerHTML = `
+    <div>${weekLabel}</div>
+    <div>avg calories/day <strong>${weekCal.toFixed(0)}</strong></div>
+    <div>avg sleep <strong>${weekSleep.toFixed(1)}</strong> hrs/day</div>
+    <div>avg workout <strong>${weekWorkout.toFixed(1)}</strong> min/day</div>
+  `;
 
-  monthlySummaryEl.textContent =
-    `${monthLabel} ` +
-    `avg calories/day ${monthCal.toFixed(0)}, ` +
-    `avg sleep ${monthSleep.toFixed(1)} hrs/day, ` +
-    `avg workout ${monthWorkout.toFixed(1)} min/day`;
+  // show the monthly summary metrics on their own lines for readability
+  monthlySummaryEl.innerHTML = `
+    <div>${monthLabel}</div>
+    <div>avg calories/day <strong>${monthCal.toFixed(0)}</strong></div>
+    <div>avg sleep <strong>${monthSleep.toFixed(1)}</strong> hrs/day</div>
+    <div>avg workout <strong>${monthWorkout.toFixed(1)}</strong> min/day</div>
+  `;
 }
 
 
