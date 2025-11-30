@@ -386,11 +386,13 @@ async function openViewModal(dateStr: string) {
   const workoutHeading = document.createElement("h4");
   workoutHeading.textContent = "Workouts";
   container.appendChild(workoutHeading);
+  // workout entries for the day
   if (dayWorkouts.length === 0) {
     const p = document.createElement("p");
     p.textContent = "No workout entries for this date.";
     container.appendChild(p);
   } else {
+    // list workouts
     const list = document.createElement("ul");
     for (const e of dayWorkouts) {
       const li = document.createElement("li");
@@ -410,6 +412,7 @@ async function openViewModal(dateStr: string) {
   if (sleepDateInput) sleepDateInput.value = dateStr;
   if (workoutDateInput) workoutDateInput.value = dateStr;
 
+  // show modal
   viewEntriesModalEl.classList.add("active");
   viewEntriesModalEl.setAttribute("aria-hidden", "false");
 }
@@ -435,6 +438,7 @@ function updateTodayDate(): void {
 
 // initialize after dom is loaded
 window.addEventListener("DOMContentLoaded", () => {
+  // get elements
   nameInputEl = document.querySelector("#name-input");
   nameFormEl = document.querySelector("#name-form");
   nameSectionEl = document.querySelector("#name-section");
@@ -473,15 +477,18 @@ window.addEventListener("DOMContentLoaded", () => {
   const logWorkoutButton = document.querySelector("#log-exercise");
   console.debug('logWorkoutButton element', logWorkoutButton);
 
+  // check for stored name
   if (storedName) {
     showHelloSection(storedName);
     renderCalendar();
     updateAverages();
     updateTodayDate();
+  // else show name input
   } else {
     showNameSection();
   }
 
+  // previous month button
   if (prevMonthButton) {
     prevMonthButton.addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
@@ -490,6 +497,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // next month button
   if (nextMonthButton) {
     nextMonthButton.addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
@@ -498,6 +506,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // name form submit handler
   nameFormEl?.addEventListener("submit", (e) => {
     e.preventDefault();
     if (nameInputEl && nameInputEl.value.trim()) {
@@ -509,6 +518,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // log nutrition button
   logNutritionButton?.addEventListener("click", () => {
     if (calorieModalEl) {
       if (calorieDateInput) calorieDateInput.value = "";
@@ -516,12 +526,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // calorie modal cancel button
   calorieCancelBtn?.addEventListener("click", () => {
     if (calorieModalEl) {
       calorieModalEl.classList.remove("active");
     }
   });
 
+  // log sleep button
   logSleepButton?.addEventListener("click", () => {
     if (sleepModalEl) {
       if (sleepDateInput) sleepDateInput.value = "";
@@ -529,12 +541,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // sleep modal cancel button
   sleepCancelBtn?.addEventListener("click", () => {
     if (sleepModalEl) {
       sleepModalEl.classList.remove("active");
     }
   });
 
+  // log workout button
   logWorkoutButton?.addEventListener("click", () => {
     console.debug('logWorkoutButton clicked');
     if (workoutModalEl) {
@@ -543,6 +557,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // workout modal cancel button
   workoutCancelBtn?.addEventListener("click", () => {
     if (workoutModalEl) {
       workoutModalEl.classList.remove("active");
@@ -551,6 +566,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   closeEntriesBtn?.addEventListener("click", () => closeViewModal());
 
+  // add entry for date button in view entries modal
   addEntryForDateBtn?.addEventListener("click", () => {
     if (viewEntriesModalEl) closeViewModal();
     if (calorieModalEl) calorieModalEl.classList.add("active");
@@ -558,8 +574,11 @@ window.addEventListener("DOMContentLoaded", () => {
     foodEl?.focus();
   });
 
+  // calorie form submit handler
   calorieFormEl?.addEventListener("submit", async (e) => {
+    // prevent default form submission
     e.preventDefault();
+    // validate inputs
     const foodEl = document.querySelector<HTMLInputElement>("#calorie-food");
     const calsEl = document.querySelector<HTMLInputElement>("#calorie-calories");
     if (!foodEl || !calsEl) return;
@@ -570,19 +589,23 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // try to save to native backend
     let savedToNative = false;
     try {
+      // get date if provided
       const dateVal = (document.querySelector("#calorie-date") as HTMLInputElement | null)?.value;
       const payload: any = { food, calories };
       if (dateVal) payload.date = dateVal;
       const res = await invoke<any>("log_calories", payload);
       console.debug("log_calories result:", res);
       savedToNative = true;
+      // provide feedback
       if (calorieFeedbackEl) calorieFeedbackEl.textContent = `Saved ${calories} cal to app storage.`;
     } catch (err) {
       savedToNative = false;
     }
 
+    // fallback to localstorage if native save failed
     if (!savedToNative) {
       const key = "calorie-entries";
       const existingRaw = localStorage.getItem(key);
@@ -594,6 +617,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (calorieFeedbackEl) calorieFeedbackEl.textContent = "Saved locally (app backend unavailable).";
     }
 
+    // reset form and update UI
     calorieFormEl?.reset();
     if (calorieDateInput) calorieDateInput.value = "";
     await renderCalendar();
@@ -603,9 +627,11 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 700);
   });
 
+  // sleep form submit handler
   sleepFormEl?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // validate inputs
     const sleepHoursEl = document.querySelector<HTMLInputElement>("#sleep-hours");
     if (!sleepHoursEl) return;
     const sleepHours = Number(sleepHoursEl.value);
@@ -614,10 +640,12 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // try to save to native backend
     let savedToNative = false;
     try {
       const dateVal = (document.querySelector("#sleep-date") as HTMLInputElement | null)?.value;
       const payload: any = { hours: sleepHours };
+      // add date if provided
       if (dateVal) payload.date = dateVal;
       const res = await invoke<any>("log_sleep", payload);
       console.debug("log_sleep result:", res);
@@ -627,6 +655,7 @@ window.addEventListener("DOMContentLoaded", () => {
       savedToNative = false;
     }
 
+    // fallback to localstorage if native save failed
     if (!savedToNative) {
       const key = "sleep-entries";
       const existingRaw = localStorage.getItem(key);
@@ -638,6 +667,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (sleepFeedbackEl) sleepFeedbackEl.textContent = "Saved locally (app backend unavailable).";
     }
 
+    // reset form and update UI
     sleepFormEl?.reset();
     if (sleepDateInput) sleepDateInput.value = "";
     await renderCalendar();
@@ -647,11 +677,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 700);
   });
 
+  // workout form submit handler
   workoutFormEl?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const workoutTypeEl = document.querySelector<HTMLInputElement>("#workout-type");
     const workoutDurationEl = document.querySelector<HTMLInputElement>("#workout-duration");
 
+    // validate inputs
     if (!workoutTypeEl || !workoutDurationEl) return;
     const workoutType = workoutTypeEl.value.trim();
     const workoutDuration = Number(workoutDurationEl.value);
@@ -660,6 +692,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // try to save to native backend
     let savedToNative = false;
     try {
       const dateVal = (document.querySelector("#workout-date") as HTMLInputElement | null)?.value;
@@ -673,6 +706,7 @@ window.addEventListener("DOMContentLoaded", () => {
       savedToNative = false;
     }
 
+    // fallback to localstorage if native save failed
     if (!savedToNative) {
       const key = "workout-entries";
       const existingRaw = localStorage.getItem(key);
@@ -684,10 +718,12 @@ window.addEventListener("DOMContentLoaded", () => {
       if (workoutFeedbackEl) workoutFeedbackEl.textContent = "Saved locally (app backend unavailable).";
     }
 
+    // reset form and update UI
     workoutFormEl?.reset();
     if (workoutDateInput) workoutDateInput.value = "";
     await renderCalendar();
     await updateAverages();
+    // close modal after brief delay
     setTimeout(() => {
       if (workoutModalEl) workoutModalEl.classList.remove("active");
     }, 700);
