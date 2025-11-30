@@ -74,12 +74,10 @@ The frontend uses Tauri `invoke(...)` to call the following native commands (Rus
 - `get_sleep_averages`
 - `get_workout_averages`
 
-> Implementation detail: the Rust wrapper unwraps the Python sidecar response of the shape `{"success": true, "data": ...}` so the frontend directly receives the array/object.
-
 ---
 
 ## Data Format
-Each file contains an array of objects with `timestamp` values (ISO 8601). Example `calories.json` entry:
+Each file contains an array of objects with `timestamp` values. Example `calories.json` entry:
 
 ```json
 [
