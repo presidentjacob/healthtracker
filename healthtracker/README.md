@@ -97,7 +97,7 @@ Each file contains an array of objects with `timestamp` values. Example `calorie
 - Calendar/Averages not updating:
 	- Confirm `invoke('log_*')` succeeded. Check app devtools (console) for `log_* result:` messages.
 	- Confirm files are written under Documents: `%USERPROFILE%\\Documents\\HealthTracker\\data`.
-	- If `invoke` throws, the app falls back to localStorage; check devtools `Application -> Local Storage` for entries and consider migrating them.
+	- If `invoke` throws, the app falls back to localStorage, check devtools `Application -> Local Storage` for entries and consider migrating them.
 	- Use `renderCalendar()` and `updateAverages()` to re-pull data programmatically (refresh button suggested).
 
 ---
